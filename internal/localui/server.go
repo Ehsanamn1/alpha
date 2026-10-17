@@ -267,7 +267,9 @@ func (s *Server) Serve(ctx context.Context, address string) error {
 	}()
 	go s.backgroundSourceRefresh(ctx)
 	err = srv.Serve(ln)
-	if errors.Is(err, http.ErrServerClosed) || ctx.Err() != nil { return nil }
+	if errors.Is(err, http.ErrServerClosed) || ctx.Err() != nil {
+		return nil
+	}
 	return err
 }
 
