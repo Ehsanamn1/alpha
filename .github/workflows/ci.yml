@@ -18,6 +18,7 @@ jobs:
           unformatted="$(gofmt -l .)"
           if [ -n "$unformatted" ]; then
             printf '%s\n' "$unformatted"
+            while IFS= read -r file; do gofmt -d "$file"; done <<< "$unformatted"
             exit 1
           fi
       - name: Install pinned sing-box config verifier
