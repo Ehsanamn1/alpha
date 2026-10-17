@@ -1,12 +1,38 @@
 name: Build and publish Alpha release
+
+# Publishing a release is explicit: update release.version on main.
+# The release action creates the matching vX.Y.Z tag at this commit.
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+    paths:
+      - 'release.version'
+
 permissions:
   contents: write
+
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        name: Validate release version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < release.version)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]; then
+            echo "Invalid release.version: $version" >&2
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+          echo "Release version: $version"
+
   build:
+    needs: prepare
     name: Build ${{ matrix.label }}
     runs-on: ubuntu-latest
     strategy:
@@ -50,16 +76,17 @@ jobs:
         run: |
           mkdir -p release
           go build -trimpath -ldflags="-s -w" -o "release/alpha-${GOOS}-${GOARCH}${{ matrix.ext }}" ./cmd/resilience
-      - name: Add Windows launchers
-        if: matrix.goos == 'windows'
-        run: cp Start-Alpha.bat Start-Alpha-Managed-Engines.bat release/
       - name: Package release asset
         env:
           ASSET_LABEL: ${{ matrix.label }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          set -euxo pipefail
           cp README_FA.md README.md CHANGELOG.md SECURITY.md LICENSE THIRD_PARTY_NOTICES.md config.example.json release/
           cp -R configs docs release/
+          if [ "${{ matrix.goos }}" = windows ]; then
+            cp Start-Alpha.bat Start-Alpha-Managed-Engines.bat release/
+          fi
           cd release
           sha256sum alpha-* > SHA256SUMS.txt
           zip -rq "$GITHUB_WORKSPACE/Alpha-${ASSET_LABEL}-${VERSION}.zip" .
@@ -68,8 +95,9 @@ jobs:
           name: Alpha-${{ matrix.label }}
           path: Alpha-${{ matrix.label }}-*.zip
           if-no-files-found: error
+
   publish:
-    needs: build
+    needs: [prepare, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -79,9 +107,10 @@ jobs:
           pattern: Alpha-*
           merge-multiple: true
       - name: Package source archive and all-in-one bundle
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           set -euxo pipefail
-          VERSION="${GITHUB_REF_NAME#v}"
           git archive --format=zip --prefix="Alpha-${VERSION}/" HEAD > "release-assets/Alpha-${VERSION}-source.zip"
           mkdir -p /tmp/alpha-bundle/source /tmp/alpha-bundle/dist
           unzip -q "release-assets/Alpha-${VERSION}-source.zip" -d /tmp/alpha-bundle/source
@@ -96,6 +125,10 @@ jobs:
       - name: Publish release and artifacts
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ needs.prepare.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: Alpha ${{ needs.prepare.outputs.version }}
+          prerelease: true
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: release-assets/*
