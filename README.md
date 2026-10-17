@@ -4,6 +4,15 @@
 
 Alpha is a local-first controller for importing compatible proxy share links, refreshing public HTTPS / Telegram-preview sources, generating sing-box configuration, probing local routes and keeping a managed sing-box process alive. Alpha does not reimplement the VLESS/VMess/Trojan protocols; it uses the external sing-box engine for imported nodes.
 
+## Download the alpha build
+
+- [All release assets](https://github.com/Ehsanamn1/alpha/releases/tag/v0.3.0-alpha)
+- [Full bundle (source + binaries)](https://github.com/Ehsanamn1/alpha/releases/download/v0.3.0-alpha/Alpha-0.3.0-alpha-bundle.zip)
+- [Source archive](https://github.com/Ehsanamn1/alpha/releases/download/v0.3.0-alpha/Alpha-0.3.0-alpha-source.zip)
+- [SHA-256 checksums](https://github.com/Ehsanamn1/alpha/releases/download/v0.3.0-alpha/SHA256SUMS.txt)
+
+The website files live in `site/`, but the public GitHub Pages URL is not live yet. Once, choose **Settings → Pages → Build and deployment → Source: GitHub Actions**, then run **Publish Alpha website** from the Actions tab.
+
 ## 0.3.0-alpha capabilities
 
 - Persian RTL dashboard with desktop navigation and mobile bottom navigation for Overview, Connect, Nodes, Sources, Routes and Diagnostics.
