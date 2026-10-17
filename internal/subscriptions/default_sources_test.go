@@ -67,7 +67,7 @@ func TestEnsureDefaultSourcesPersistAndSeedOnlyOnce(t *testing.T) {
 
 func TestLegacyTelegramSourceURLCanBeMigrated(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "catalog.json")
-	legacy := "{"sources":[{"id":"abc","name":"old Telegram","kind":"telegram","host":"networkti","enabled":true}],"nodes":[]}"
+	legacy := "{\"sources\":[{\"id\":\"abc\",\"name\":\"old Telegram\",\"kind\":\"telegram\",\"host\":\"networkti\",\"enabled\":true}],\"nodes\":[]} "
 	if err := os.WriteFile(path, []byte(legacy), 0600); err != nil {
 		t.Fatal(err)
 	}
