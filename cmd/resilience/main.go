@@ -15,12 +15,13 @@ import (
 
 	"github.com/Ehsanamn1/alpha/internal/config"
 	"github.com/Ehsanamn1/alpha/internal/engine"
+	"github.com/Ehsanamn1/alpha/internal/health"
 	"github.com/Ehsanamn1/alpha/internal/localui"
 	"github.com/Ehsanamn1/alpha/internal/orchestrator"
 	"github.com/Ehsanamn1/alpha/internal/router"
 )
 
-const version = "0.4.2-alpha"
+const version = "0.4.3-alpha"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -37,6 +38,8 @@ func main() {
 		validateCommand(os.Args[2:])
 	case "doctor":
 		doctorCommand(os.Args[2:])
+	case "smoke":
+		smokeCommand(os.Args[2:])
 	case "run":
 		runCommand(os.Args[2:])
 	case "ui":
@@ -58,6 +61,7 @@ Usage:
   alpha engines
   alpha validate --config config.json
   alpha doctor --config config.json
+  alpha smoke --config config.json [--timeout 30s]
   alpha run --config config.json [--allow-process-launch]
   alpha ui --config config.json [--allow-process-launch] [--no-open]
 
@@ -65,6 +69,7 @@ Commands:
   engines    Show adapter types and integration status
   validate   Validate configuration without opening network connections
   doctor     Probe enabled local SOCKS5 engines against configured probe targets
+  smoke      Verify HTTP/HTTPS egress through the running Alpha SOCKS5 router
   run        Start configured local engine processes (opt-in) and the local router
   ui         Start the router plus the responsive local Alpha control panel
 
@@ -165,6 +170,35 @@ func doctorCommand(args []string) {
 		fmt.Println("No working route was verified. This does not distinguish filtering from server/configuration failure by itself.")
 		os.Exit(1)
 	}
+}
+
+func smokeCommand(args []string) {
+	fs := flag.NewFlagSet("smoke", flag.ExitOnError)
+	path := fs.String("config", "config.json", "Path to configuration JSON")
+	timeout := fs.Duration("timeout", 30*time.Second, "Maximum time to verify the end-to-end route")
+	_ = fs.Parse(args)
+
+	cfg, err := loadConfig(*path)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "CONFIG ERROR:", err)
+		os.Exit(1)
+	}
+	if *timeout < time.Second || *timeout > 2*time.Minute {
+		fmt.Fprintln(os.Stderr, "timeout must be between 1s and 2m")
+		os.Exit(2)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
+	defer cancel()
+	latency, err := health.ProbeAny(ctx, cfg.Listen, cfg.ProbeTargets())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[FAIL] No verified HTTP/HTTPS route passed through Alpha at %s.\n", cfg.Listen)
+		fmt.Fprintln(os.Stderr, "Keep the Alpha UI open, connect a real node, and inspect its Routes/Diagnostics panels.")
+		fmt.Fprintln(os.Stderr, "This report does not print subscription URLs or node credentials.")
+		os.Exit(1)
+	}
+	fmt.Printf("[OK] HTTP/HTTPS egress passed through Alpha SOCKS5 %s (%s).\n", cfg.Listen, latency.Round(timePrecision()))
+	fmt.Printf("Probe targets configured: %d; at least one passed, not necessarily all targets.\n", len(cfg.ProbeTargets()))
 }
 
 func timePrecision() time.Duration { return 10 * time.Millisecond }
