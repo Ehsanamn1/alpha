@@ -186,45 +186,75 @@ func serveMappedSOCKS5(listener net.Listener, mappedTarget string, observed chan
 			}
 			noAuth := false
 			for _, method := range methods {
-				if method == 0 { noAuth = true }
+				if method == 0 {
+					noAuth = true
+				}
 			}
-			if !noAuth { _, _ = c.Write([]byte{5, 0xff}); return }
-			if _, err := c.Write([]byte{5, 0}); err != nil { return }
+			if !noAuth {
+				_, _ = c.Write([]byte{5, 0xff})
+				return
+			}
+			if _, err := c.Write([]byte{5, 0}); err != nil {
+				return
+			}
 
 			var h [4]byte
-			if _, err := io.ReadFull(c, h[:]); err != nil || h[0] != 5 || h[1] != 1 || h[2] != 0 { return }
+			if _, err := io.ReadFull(c, h[:]); err != nil || h[0] != 5 || h[1] != 1 || h[2] != 0 {
+				return
+			}
 			host := ""
 			switch h[3] {
 			case 1:
 				var ip [4]byte
-				if _, err := io.ReadFull(c, ip[:]); err != nil { return }
+				if _, err := io.ReadFull(c, ip[:]); err != nil {
+					return
+				}
 				host = net.IP(ip[:]).String()
 			case 4:
 				var ip [16]byte
-				if _, err := io.ReadFull(c, ip[:]); err != nil { return }
+				if _, err := io.ReadFull(c, ip[:]); err != nil {
+					return
+				}
 				host = net.IP(ip[:]).String()
 			case 3:
 				var n [1]byte
-				if _, err := io.ReadFull(c, n[:]); err != nil { return }
+				if _, err := io.ReadFull(c, n[:]); err != nil {
+					return
+				}
 				name := make([]byte, int(n[0]))
-				if _, err := io.ReadFull(c, name); err != nil { return }
+				if _, err := io.ReadFull(c, name); err != nil {
+					return
+				}
 				host = string(name)
 			default:
 				return
 			}
 			var p [2]byte
-			if _, err := io.ReadFull(c, p[:]); err != nil { return }
+			if _, err := io.ReadFull(c, p[:]); err != nil {
+				return
+			}
 			target := net.JoinHostPort(host, strconv.Itoa(int(binary.BigEndian.Uint16(p[:]))))
-			select { case observed <- target: default: }
+			select {
+			case observed <- target:
+			default:
+			}
 			if target != net.JoinHostPort("1.1.1.1", "443") {
 				_, _ = c.Write([]byte{5, 5, 0, 1, 0, 0, 0, 0, 0, 0})
 				return
 			}
 			dst, err := net.DialTimeout("tcp", mappedTarget, 4*time.Second)
-			if err != nil { _, _ = c.Write([]byte{5, 5, 0, 1, 0, 0, 0, 0, 0, 0}); return }
+			if err != nil {
+				_, _ = c.Write([]byte{5, 5, 0, 1, 0, 0, 0, 0, 0, 0})
+				return
+			}
 			defer dst.Close()
-			if _, err := c.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0}); err != nil { return }
-			go func() { _, _ = io.Copy(dst, c); _ = dst.Close() }()
+			if _, err := c.Write([]byte{5, 0, 0, 1, 0, 0, 0, 0, 0, 0}); err != nil {
+				return
+			}
+			go func() {
+				_, _ = io.Copy(dst, c)
+				_ = dst.Close()
+			}()
 			_, _ = io.Copy(c, dst)
 		}(conn)
 	}
@@ -234,12 +264,19 @@ func startSingBoxProcess(t *testing.T, path, configPath string) <-chan error {
 	t.Helper()
 	cmd := exec.Command(path, "run", "-c", configPath)
 	cmd.Stdout, cmd.Stderr = io.Discard, io.Discard
-	if err := cmd.Start(); err != nil { t.Fatalf("start sing-box: %v", err) }
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("start sing-box: %v", err)
+	}
 	done := make(chan error, 1)
 	go func() { done <- cmd.Wait() }()
 	t.Cleanup(func() {
-		if cmd.Process != nil { _ = cmd.Process.Kill() }
-		select { case <-done: case <-time.After(3 * time.Second): }
+		if cmd.Process != nil {
+			_ = cmd.Process.Kill()
+		}
+		select {
+		case <-done:
+		case <-time.After(3 * time.Second):
+		}
 	})
 	return done
 }
@@ -249,7 +286,10 @@ func waitForLoopback(t *testing.T, address string, processDone <-chan error) {
 	deadline := time.Now().Add(12 * time.Second)
 	for time.Now().Before(deadline) {
 		conn, err := net.DialTimeout("tcp", address, 150*time.Millisecond)
-		if err == nil { _ = conn.Close(); return }
+		if err == nil {
+			_ = conn.Close()
+			return
+		}
 		select {
 		case processErr := <-processDone:
 			t.Fatalf("process stopped before opening %s: %v", address, processErr)
@@ -263,7 +303,9 @@ func waitForLoopback(t *testing.T, address string, processDone <-chan error) {
 func freeLoopbackAddress(t *testing.T) string {
 	t.Helper()
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	addr := ln.Addr().String()
 	_ = ln.Close()
 	return addr
@@ -272,9 +314,13 @@ func freeLoopbackAddress(t *testing.T) string {
 func portNumber(t *testing.T, address string) int {
 	t.Helper()
 	_, text, err := net.SplitHostPort(address)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	port, err := strconv.Atoi(text)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	return port
 }
 

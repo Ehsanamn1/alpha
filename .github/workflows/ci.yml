@@ -14,7 +14,12 @@ jobs:
           go-version: '1.23.x'
           cache: true
       - name: Check formatting
-        run: test -z "$(gofmt -l .)"
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            printf '%s\n' "$unformatted"
+            exit 1
+          fi
       - name: Install pinned sing-box config verifier
         run: |
           set -euxo pipefail
