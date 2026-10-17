@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.2-alpha — 2026-10-17
+
+- Added a deterministic end-to-end source recovery test through Alpha's SOCKS5 router and the official sing-box 1.14.2 process.
+- The test forces direct TLS trust failure, verifies fallback fetching over a real HTTPS/TLS session, checks public-IP pinning, and confirms the fetched proxy link parses successfully.
+- Added native Windows CI coverage for the same path, with the official sing-box zip pinned by SHA-256; Linux runs the test as part of the race-enabled suite.
+- Added a configurable internal fallback proxy address so test harnesses can use an isolated loopback port while production still defaults to 127.0.0.1:1088.
+- This is controlled end-to-end acceptance coverage; real Iran ISP behavior and public proxy uptime still require field testing.
+
 ## 0.4.1-alpha — 2026-10-17
 
 - Fixed standard `trojan://password@host:port` parsing; passwords without a colon are now read from the URI username component.
