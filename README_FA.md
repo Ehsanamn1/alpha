@@ -4,6 +4,15 @@
 
 آلفا یک برنامهٔ محلی برای جمع‌آوری کانفیگ‌های سازگار، دنبال‌کردن منابع عمومی قابل دسترس، آزمودن مسیرها و مدیریت اتصال از طریق موتورهای بیرونی است. هستهٔ اصلی آلفا خودش پروتکل‌های VLESS/VMess/Trojan را پیاده‌سازی نمی‌کند؛ برای اجرای آن نودها از sing-box استفاده می‌کند.
 
+## دریافت نسخهٔ آزمایشی
+
+- [صفحهٔ Release و همهٔ فایل‌ها](https://github.com/Ehsanamn1/alpha/releases/tag/v0.3.0-alpha)
+- [بستهٔ کامل شامل سورس و باینری‌ها](https://github.com/Ehsanamn1/alpha/releases/download/v0.3.0-alpha/Alpha-0.3.0-alpha-bundle.zip)
+- [سورس مستقل](https://github.com/Ehsanamn1/alpha/releases/download/v0.3.0-alpha/Alpha-0.3.0-alpha-source.zip)
+- [فایل بررسی SHA-256](https://github.com/Ehsanamn1/alpha/releases/download/v0.3.0-alpha/SHA256SUMS.txt)
+
+فایل‌های سایت در پوشهٔ `site/` آماده‌اند، اما آدرس عمومی GitHub Pages هنوز منتشر نشده چون باید یک‌بار در **Settings → Pages → Build and deployment → Source** گزینهٔ **GitHub Actions** انتخاب شود. سپس در Actions اجرای **Publish Alpha website** را با **Run workflow** اجرا کن.
+
 ## قابلیت‌های نسخهٔ 0.3.0-alpha
 
 - پنل فارسی RTL با ناوبری دسکتاپ و نوار پایین موبایل: نمای کلی، اتصال، کانفیگ‌ها، منابع، مسیرها و عیب‌یابی.
