@@ -298,6 +298,11 @@ func parseURLProxy(raw, scheme string) (string, string, string, int, map[string]
 		password := ""
 		if p.User != nil {
 			password, _ = p.User.Password()
+			// Most trojan:// share links encode the credential as a single
+			// password before "@", not as user:password.
+			if password == "" {
+				password = p.User.Username()
+			}
 		}
 		if password == "" {
 			return "", "", "", 0, nil, errors.New("Trojan link has no password")
