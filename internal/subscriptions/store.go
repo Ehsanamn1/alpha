@@ -44,11 +44,12 @@ type Catalog struct {
 }
 
 type Store struct {
-	mu        sync.RWMutex
-	refreshMu sync.Mutex
-	path      string
-	data      Catalog
-	client    *http.Client
+	mu                sync.RWMutex
+	refreshMu         sync.Mutex
+	path              string
+	data              Catalog
+	client            *http.Client
+	fallbackProxyAddr string
 }
 
 func NewStore() (*Store, error) {
@@ -63,7 +64,12 @@ func NewStoreAt(path string) (*Store, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return nil, err
 	}
-	s := &Store{path: path, data: Catalog{Sources: []Source{}, Nodes: []Node{}}, client: &http.Client{Timeout: 12 * time.Second}}
+	s := &Store{
+		path:              path,
+		data:              Catalog{Sources: []Source{}, Nodes: []Node{}},
+		client:            &http.Client{Timeout: 12 * time.Second},
+		fallbackProxyAddr: "127.0.0.1:1088",
+	}
 	if b, err := os.ReadFile(path); err == nil {
 		if err := json.Unmarshal(b, &s.data); err != nil {
 			return nil, fmt.Errorf("read local Alpha catalog: %w", err)
@@ -635,9 +641,18 @@ func (s *Store) doSourceRequest(ctx context.Context, rawURL string, viaAlpha boo
 		TLSHandshakeTimeout:   8 * time.Second,
 		ResponseHeaderTimeout: 10 * time.Second,
 	}
+	// Preserve injected TLS roots for deterministic end-to-end tests; production
+	// leaves this nil and uses the platform trust store.
+	if baseTransport, ok := s.client.Transport.(*http.Transport); ok && baseTransport.TLSClientConfig != nil {
+		transport.TLSClientConfig = baseTransport.TLSClientConfig.Clone()
+	}
 	if viaAlpha {
+		proxyAddress := s.fallbackProxyAddr
+		if strings.TrimSpace(proxyAddress) == "" {
+			proxyAddress = "127.0.0.1:1088"
+		}
 		transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
-			return dialPublicSourceViaSOCKS5(ctx, "127.0.0.1:1088", network, address)
+			return dialPublicSourceViaSOCKS5(ctx, proxyAddress, network, address)
 		}
 	}
 	client := *s.client
