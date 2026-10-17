@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.3-alpha — 2026-10-17
+
+- Added `alpha smoke`, a cross-platform CLI command that probes real HTTP/HTTPS egress through the running Alpha SOCKS5 router after the user connects a node.
+- Smoke output is privacy-conscious: pass/fail and latency only, without printing subscription URLs or node credentials.
+- Added a Windows/Linux field acceptance guide for testing a real imported node and the subscription fallback on the target network.
+- The smoke command never connects or starts a node on its own; the user must explicitly connect from the UI first.
+
 ## 0.4.2-alpha — 2026-10-17
 
 - Added a deterministic end-to-end source recovery test through Alpha's SOCKS5 router and the official sing-box 1.14.2 process.

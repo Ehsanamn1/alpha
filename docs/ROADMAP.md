@@ -1,4 +1,4 @@
-# Alpha roadmap — 0.4.0-alpha
+# Alpha roadmap — 0.4.3-alpha
 
 ## Completed in this alpha
 
@@ -13,6 +13,7 @@
 
 ## Phase 1 — Real connectivity and safety
 
+- [x] Add `alpha smoke` for a live HTTP/HTTPS probe through the running Alpha SOCKS5 router; the command does not print node credentials.
 - [x] Add deterministic E2E source-fetch recovery through the Alpha SOCKS5 router and official sing-box 1.14.2; tested on Linux and Windows with a controlled TLS source and mapped SOCKS upstream.
 - [ ] End-to-end acceptance test with an official sing-box binary and real configs on Windows/Linux/macOS.
 - [x] CI validates representative generated profiles for eight protocols against pinned official sing-box v1.14.2; provider-specific variants and live service endpoints still require real-world acceptance tests.

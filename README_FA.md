@@ -6,20 +6,20 @@
 
 **وب‌سایت:** https://ehsanamn1.github.io/alpha/ · **انتشارها:** https://github.com/Ehsanamn1/alpha/releases · **سورس:** https://github.com/Ehsanamn1/alpha
 
-> **نسخه: 0.4.2-alpha — آزمایشی.** واردسازی منابع و تولید تنظیمات sing-box اضافه شده، اما هنوز VPN بومی سراسری Android/iOS، ادغام پروتکل TheFeed از روی DNS، iodine یا Spoof Tunnel و آزمون میدانی روی شبکه‌های ایران تکمیل نشده‌اند.
+> **نسخه: 0.4.3-alpha — آزمایشی.** واردسازی منابع و تولید تنظیمات sing-box اضافه شده، اما هنوز VPN بومی سراسری Android/iOS، ادغام پروتکل TheFeed از روی DNS، iodine یا Spoof Tunnel و آزمون میدانی روی شبکه‌های ایران تکمیل نشده‌اند.
 
 آلفا یک برنامهٔ محلی برای جمع‌آوری کانفیگ‌های سازگار، دنبال‌کردن منابع عمومی قابل دسترس، آزمودن مسیرها و مدیریت اتصال از طریق موتورهای بیرونی است. هستهٔ اصلی آلفا خودش پروتکل‌های VLESS/VMess/Trojan را پیاده‌سازی نمی‌کند؛ برای اجرای آن نودها از sing-box استفاده می‌کند.
 
 ## دریافت نسخهٔ آزمایشی
 
-- [صفحهٔ Release و همهٔ فایل‌ها](https://github.com/Ehsanamn1/alpha/releases/tag/v0.4.2-alpha)
-- [بستهٔ کامل شامل سورس و باینری‌ها](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.2-alpha/Alpha-0.4.2-alpha-bundle.zip)
-- [سورس مستقل](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.2-alpha/Alpha-0.4.2-alpha-source.zip)
-- [فایل بررسی SHA-256](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.2-alpha/SHA256SUMS.txt)
+- [صفحهٔ Release و همهٔ فایل‌ها](https://github.com/Ehsanamn1/alpha/releases/tag/v0.4.3-alpha)
+- [بستهٔ کامل شامل سورس و باینری‌ها](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.3-alpha/Alpha-0.4.3-alpha-bundle.zip)
+- [سورس مستقل](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.3-alpha/Alpha-0.4.3-alpha-source.zip)
+- [فایل بررسی SHA-256](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.3-alpha/SHA256SUMS.txt)
 
 وب‌سایت عمومی آلفا اکنون در [ehsanamn1.github.io/alpha](https://ehsanamn1.github.io/alpha/) منتشر است. این سایت یک صفحهٔ معرفی/دریافتِ قابل نصب است؛ کنترلر و پراکسی واقعی روی دستگاه کاربر اجرا می‌شوند و به‌صورت سرور عمومی منتشر نشده‌اند.
 
-## قابلیت‌های نسخهٔ 0.4.2-alpha
+## قابلیت‌های نسخهٔ 0.4.3-alpha
 
 - پنل فارسی RTL با ناوبری دسکتاپ و نوار پایین موبایل: نمای کلی، اتصال، کانفیگ‌ها، منابع، مسیرها و عیب‌یابی.
 - واردسازی لینک‌های `vless://`, `vmess://`, `trojan://`, `ss://`, `hysteria2://` / `hy2://`, `tuic://`, `anytls://`, `socks5://`, `socks://`, `http://` و `https://` که با parser سازگار باشند.
@@ -40,6 +40,7 @@
 3. موتور `sing-box` را از [منبع رسمی](https://github.com/SagerNet/sing-box/releases) نصب کن و مطمئن شو دستور `sing-box` در `PATH` در دسترس است یا فایل را در پوشهٔ `engines` کنار آلفا قرار داده‌ای.
 4. آلفا را اجرا کن و در کنسول «منابع» یا «کانفیگ‌ها» را باز کن؛ لینک‌های خودت را وارد کن.
 5. دکمهٔ «اتصال هوشمند» پیکربندی را اعتبارسنجی می‌کند و سپس موتور را اجرا می‌کند. برنامه‌هایی که می‌خواهی از مسیر استفاده کنند باید به SOCKS5 محلی `127.0.0.1:1088` متصل شوند.
+6. وقتی یک نود واقعی وصل است، در ترمینال دوم `alpha-windows-amd64.exe smoke --config config.json --timeout 30s` را اجرا کن. `[OK]` یعنی یک درخواست HTTP/HTTPS از مسیر روتر Alpha عبور کرده است؛ این تضمین دسترسی به همهٔ سایت‌ها یا پایداری دائمی نیست.
 
 برای اجرا از سورس (Go 1.23+):
 
@@ -50,6 +51,10 @@ go vet ./...
 go run ./cmd/resilience engines
 go run ./cmd/resilience ui --config config.json
 ```
+
+## آزمون میدانی روی نود واقعی
+
+فرمان `smoke` ترافیک را از مسیر SOCKS5 آلفا به مقصدهای آزمون پیکربندی‌شده می‌فرستد. برای راهنمای آزمون دقیق Windows/Linux و عیب‌یابی، [راهنمای پذیرش شبکهٔ واقعی](docs/REAL_NETWORK_ACCEPTANCE_FA.md) را بخوان. فایل‌های `config.json` و `catalog.json` و URI خام کانفیگ را برای گزارش‌گیری عمومی منتشر نکن.
 
 ## منابع و همگام‌سازی
 

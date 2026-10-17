@@ -48,6 +48,7 @@ jobs:
           test -s site/icon.svg
           node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('site/manifest.webmanifest','utf8')); if(m.start_url!=='./'||m.scope!=='./'||!m.icons?.length) process.exit(1)"
           grep -q 'https://ehsanamn1.github.io/alpha/' README_FA.md
+          go run ./cmd/resilience help | grep -q 'smoke --config'
 
   windows-e2e:
     name: End-to-end source fallback (Windows)

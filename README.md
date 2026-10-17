@@ -6,20 +6,20 @@
 
 **Website:** https://ehsanamn1.github.io/alpha/ · **Releases:** https://github.com/Ehsanamn1/alpha/releases · **Source:** https://github.com/Ehsanamn1/alpha
 
-**Version: 0.4.2-alpha. Experimental; not a production-ready or guaranteed anti-censorship VPN.**
+**Version: 0.4.3-alpha. Experimental; not a production-ready or guaranteed anti-censorship VPN.**
 
 Alpha is a local-first controller for importing compatible proxy share links, refreshing public HTTPS / Telegram-preview sources, generating sing-box configuration, probing local routes and keeping a managed sing-box process alive. Alpha does not reimplement the VLESS/VMess/Trojan protocols; it uses the external sing-box engine for imported nodes.
 
 ## Download the alpha build
 
-- [All release assets](https://github.com/Ehsanamn1/alpha/releases/tag/v0.4.2-alpha)
-- [Full bundle (source + binaries)](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.2-alpha/Alpha-0.4.2-alpha-bundle.zip)
-- [Source archive](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.2-alpha/Alpha-0.4.2-alpha-source.zip)
-- [SHA-256 checksums](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.2-alpha/SHA256SUMS.txt)
+- [All release assets](https://github.com/Ehsanamn1/alpha/releases/tag/v0.4.3-alpha)
+- [Full bundle (source + binaries)](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.3-alpha/Alpha-0.4.3-alpha-bundle.zip)
+- [Source archive](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.3-alpha/Alpha-0.4.3-alpha-source.zip)
+- [SHA-256 checksums](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.3-alpha/SHA256SUMS.txt)
 
 The public product/download website is published at [ehsanamn1.github.io/alpha](https://ehsanamn1.github.io/alpha/). It is a static, installable information/download portal; the controller and proxy run locally on the user's device and are not exposed as a public service.
 
-## 0.4.2-alpha capabilities
+## 0.4.3-alpha capabilities
 
 - Persian RTL dashboard with desktop navigation and mobile bottom navigation for Overview, Connect, Nodes, Sources, Routes and Diagnostics.
 - Import supported `vless://`, `vmess://`, `trojan://`, `ss://`, `hysteria2://`, `tuic://`, `anytls://`, SOCKS and HTTP share links, plus Base64 subscription bodies.
@@ -42,9 +42,13 @@ go run ./cmd/resilience engines
 go run ./cmd/resilience ui --config config.json
 ```
 
-On first Windows launch, `Start-Alpha.bat` creates `config.json` from `config.example.json`; review it and launch again. In the local dashboard, add raw share links or a supported HTTPS subscription / public Telegram channel, then explicitly click **Connect**. Apps must be configured to use Alpha's local SOCKS5 endpoint `127.0.0.1:1088`.
+On first Windows launch, `Start-Alpha.bat` creates `config.json` from `config.example.json`; review it and launch again. In the local dashboard, add raw share links or a supported HTTPS subscription / public Telegram channel, then explicitly click **Connect**. Apps must be configured to use Alpha's local SOCKS5 endpoint `127.0.0.1:1088`. After connecting a real node, run `alpha-windows-amd64.exe smoke --config config.json --timeout 30s` from a second terminal to test HTTP/HTTPS egress through Alpha without printing node credentials.
 
 Install sing-box from its [official releases](https://github.com/SagerNet/sing-box/releases). Alpha validates its generated config with `sing-box check` before launching it. Exact compatibility can still vary by sing-box version and node-provider conventions.
+
+## Live acceptance test
+
+With the Alpha UI running and a real node explicitly connected, run `alpha smoke --config config.json --timeout 30s` from a second terminal. `[OK]` means at least one configured HTTP/HTTPS probe passed through Alpha's own SOCKS5 router at that moment. It does not guarantee access to every website or continuous availability. See [`docs/REAL_NETWORK_ACCEPTANCE_FA.md`](docs/REAL_NETWORK_ACCEPTANCE_FA.md) for the Windows/Linux field test.
 
 ## Sources and limits
 
