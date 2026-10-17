@@ -219,7 +219,6 @@ func TestShareLinkCannotSilentlyDisableTLSVerification(t *testing.T) {
 	}
 }
 
-
 // If the official sing-box executable is available, validate generated
 // configurations against the actual engine schema instead of only checking
 // that the generated JSON is syntactically valid.
