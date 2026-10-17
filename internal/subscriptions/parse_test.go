@@ -1,10 +1,15 @@
 package subscriptions
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestParseVLESSAndBuildSingBoxConfig(t *testing.T) {
@@ -211,5 +216,54 @@ func TestShareLinkCannotSilentlyDisableTLSVerification(t *testing.T) {
 	}
 	if tlsConfig["insecure"] == true {
 		t.Fatal("imported link must not silently disable TLS verification")
+	}
+}
+
+
+// If the official sing-box executable is available, validate generated
+// configurations against the actual engine schema instead of only checking
+// that the generated JSON is syntactically valid.
+func TestGeneratedConfigsPassSingBoxCheck(t *testing.T) {
+	binary, err := exec.LookPath("sing-box")
+	if err != nil {
+		t.Skip("official sing-box binary is not installed; CI installs a pinned verifier")
+	}
+	vmessPayload := `{"v":"2","ps":"VMess","add":"example.net","port":"443","id":"01234567-89ab-cdef-0123-456789abcdef","aid":0,"scy":"auto","net":"ws","host":"example.net","path":"/ws","tls":"tls","sni":"example.net"}`
+	vmessURI := "vmess://" + base64.StdEncoding.EncodeToString([]byte(vmessPayload))
+	cases := []struct {
+		name string
+		uri  string
+	}{
+		{"vless-ws-tls", "vless://01234567-89ab-cdef-0123-456789abcdef@example.net:443?encryption=none&security=tls&sni=example.net&type=ws&path=%2Fedge#VLESS"},
+		{"vmess-ws-tls", vmessURI},
+		{"trojan-tls", "trojan://secret@example.net:443?sni=example.net#Trojan"},
+		{"shadowsocks", "ss://YWVzLTI1Ni1nY206cGFzcw@example.net:443#Shadowsocks"},
+		{"hysteria2", "hysteria2://secret@example.net:443?sni=example.net#Hysteria2"},
+		{"tuic", "tuic://01234567-89ab-cdef-0123-456789abcdef:secret@example.net:443?sni=example.net#TUIC"},
+		{"anytls", "anytls://secret@example.net:443?sni=example.net#AnyTLS"},
+		{"socks5", "socks5://user:pass@example.net:1080#SOCKS5"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			node, _, err := ParseNode(tc.uri, "", tc.name)
+			if err != nil {
+				t.Fatalf("parse fixture: %v", err)
+			}
+			generated, err := SingBoxConfig([]Node{node})
+			if err != nil {
+				t.Fatalf("generate sing-box config: %v", err)
+			}
+			path := filepath.Join(t.TempDir(), "config.json")
+			if err := os.WriteFile(path, generated, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			cmd := exec.CommandContext(ctx, binary, "check", "-c", path)
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				t.Fatalf("sing-box rejected generated config: %v\n%s", err, output)
+			}
+		})
 	}
 }

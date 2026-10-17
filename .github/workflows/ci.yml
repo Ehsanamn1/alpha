@@ -15,6 +15,18 @@ jobs:
           cache: true
       - name: Check formatting
         run: test -z "$(gofmt -l .)"
+      - name: Install pinned sing-box config verifier
+        run: |
+          set -euxo pipefail
+          archive="/tmp/sing-box-1.14.2-linux-amd64.tar.gz"
+          curl -fsSL "https://github.com/SagerNet/sing-box/releases/download/v1.14.2/sing-box-1.14.2-linux-amd64.tar.gz" -o "$archive"
+          echo "a684484d7477d1437282ee411f4d131d0340aaad60a7868841ebd5d87dd8a0c6  $archive" | sha256sum --check -
+          mkdir -p /tmp/sing-box-verifier
+          tar -xzf "$archive" -C /tmp/sing-box-verifier
+          binary="$(find /tmp/sing-box-verifier -type f -name sing-box -perm -u+x | head -n 1)"
+          test -n "$binary"
+          sudo install "$binary" /usr/local/bin/sing-box
+          sing-box version
       - name: Unit and integration tests
         run: go test -race ./...
       - name: Static analysis
