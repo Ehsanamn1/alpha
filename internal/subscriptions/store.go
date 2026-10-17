@@ -38,10 +38,10 @@ type Source struct {
 }
 
 type Catalog struct {
-	Sources   []Source `json:"sources"`
-	Nodes     []Node   `json:"nodes"`
-	UpdatedAt string   `json:"updated_at"`
-	DefaultsSeeded bool `json:"defaults_seeded,omitempty"`
+	Sources        []Source `json:"sources"`
+	Nodes          []Node   `json:"nodes"`
+	UpdatedAt      string   `json:"updated_at"`
+	DefaultsSeeded bool     `json:"defaults_seeded,omitempty"`
 }
 
 type Store struct {
@@ -244,8 +244,7 @@ func (s *Store) AddSource(name, rawURL string) (Source, error) {
 	return source, nil
 }
 
-
-var builtInTelegramSources = []struct { name, url string }{
+var builtInTelegramSources = []struct{ name, url string }{
 	{name: "V2Ray Free Config", url: "@v2ray_free_conf"},
 	{name: "V2RayNG Free Configs", url: "@configv2rayng"},
 	{name: "VIProxys", url: "@VIProxys"},
@@ -257,24 +256,40 @@ var builtInTelegramSources = []struct { name, url string }{
 func (s *Store) EnsureDefaultSources() (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.data.DefaultsSeeded { return 0, nil }
+	if s.data.DefaultsSeeded {
+		return 0, nil
+	}
 	original := append([]Source(nil), s.data.Sources...)
 	added := 0
 	for _, candidate := range builtInTelegramSources {
 		normalized, kind, host, err := normalizeSourceURL(candidate.url)
-		if err != nil { s.data.Sources = original; return 0, fmt.Errorf("invalid built-in Telegram source: %w", err) }
+		if err != nil {
+			s.data.Sources = original
+			return 0, fmt.Errorf("invalid built-in Telegram source: %w", err)
+		}
 		found := false
 		for _, existing := range s.data.Sources {
-			if existing.URL == normalized || (existing.Kind == kind && strings.EqualFold(existing.Host, host)) { found = true; break }
+			if existing.URL == normalized || (existing.Kind == kind && strings.EqualFold(existing.Host, host)) {
+				found = true
+				break
+			}
 		}
-		if found { continue }
-		if len(s.data.Sources) >= 1000 { break }
+		if found {
+			continue
+		}
+		if len(s.data.Sources) >= 1000 {
+			break
+		}
 		sum := sha256.Sum256([]byte(normalized))
 		s.data.Sources = append(s.data.Sources, Source{ID: hex.EncodeToString(sum[:8]), Name: candidate.name, Kind: kind, Host: host, Enabled: true, URL: normalized})
 		added++
 	}
 	s.data.DefaultsSeeded = true
-	if err := s.saveLocked(); err != nil { s.data.Sources = original; s.data.DefaultsSeeded = false; return 0, err }
+	if err := s.saveLocked(); err != nil {
+		s.data.Sources = original
+		s.data.DefaultsSeeded = false
+		return 0, err
+	}
 	return added, nil
 }
 
