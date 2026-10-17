@@ -1,0 +1,85 @@
+name: Alpha release builder
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'release-trigger/READY'
+  workflow_dispatch:
+permissions:
+  contents: write
+
+jobs:
+  test-build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Alpha source
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: false
+      - name: Verify source and run tests
+        run: |
+          set -euxo pipefail
+          test -f go.mod
+          test -f internal/localui/subscriptions_api.go
+          test -f site/index.html
+          test -z "$(gofmt -l ./cmd ./internal)"
+          go test -race ./...
+          go vet ./...
+          node --check internal/localui/web/app.js
+          node --check internal/localui/web/sw.js
+          go run ./cmd/resilience validate --config config.example.json
+      - name: Build five platform packages and source archive
+        run: |
+          set -euxo pipefail
+          VERSION=0.3.0-alpha
+          mkdir -p /tmp/alpha-release
+          while read -r goos goarch label ext; do
+            [ -n "$goos" ] || continue
+            stage="/tmp/alpha-release/$label"
+            mkdir -p "$stage"
+            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o "$stage/alpha${ext}" ./cmd/resilience
+            cp README_FA.md README.md CHANGELOG.md SECURITY.md LICENSE THIRD_PARTY_NOTICES.md config.example.json "$stage/"
+            cp -R configs docs "$stage/"
+            if [ "$goos" = windows ]; then
+              cp Start-Alpha.bat Start-Alpha-Managed-Engines.bat "$stage/"
+            fi
+            (cd "$stage" && sha256sum alpha* > SHA256SUMS.txt && zip -rq "$GITHUB_WORKSPACE/Alpha-${label}-${VERSION}.zip" .)
+          done <<'TARGETS'
+          windows amd64 Windows-x64 .exe
+          linux amd64 Linux-x64
+          linux arm64 Linux-ARM64
+          darwin amd64 macOS-Intel
+          darwin arm64 macOS-Apple-Silicon
+          TARGETS
+          git archive --format=zip --prefix="Alpha-${VERSION}/" HEAD > "Alpha-${VERSION}-source.zip"
+          mkdir -p /tmp/alpha-bundle/source /tmp/alpha-bundle/dist
+          unzip -q "Alpha-${VERSION}-source.zip" -d /tmp/alpha-bundle/source
+          cp /tmp/alpha-release/Windows-x64/alpha.exe /tmp/alpha-bundle/dist/alpha-windows-amd64.exe
+          cp /tmp/alpha-release/Linux-x64/alpha /tmp/alpha-bundle/dist/alpha-linux-amd64
+          cp /tmp/alpha-release/Linux-ARM64/alpha /tmp/alpha-bundle/dist/alpha-linux-arm64
+          cp /tmp/alpha-release/macOS-Intel/alpha /tmp/alpha-bundle/dist/alpha-macos-intel
+          cp /tmp/alpha-release/macOS-Apple-Silicon/alpha /tmp/alpha-bundle/dist/alpha-macos-arm64
+          cp "Alpha-${VERSION}-source.zip" /tmp/alpha-bundle/
+          (cd /tmp/alpha-bundle && zip -qr "$GITHUB_WORKSPACE/Alpha-${VERSION}-bundle.zip" .)
+          sha256sum Alpha-*.zip > SHA256SUMS.txt
+      - name: Publish Alpha pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.3.0-alpha
+          target_commitish: main
+          name: Alpha 0.3.0-alpha
+          prerelease: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            Alpha-Windows-x64-0.3.0-alpha.zip
+            Alpha-Linux-x64-0.3.0-alpha.zip
+            Alpha-Linux-ARM64-0.3.0-alpha.zip
+            Alpha-macOS-Intel-0.3.0-alpha.zip
+            Alpha-macOS-Apple-Silicon-0.3.0-alpha.zip
+            Alpha-0.3.0-alpha-source.zip
+            Alpha-0.3.0-alpha-bundle.zip
+            SHA256SUMS.txt
