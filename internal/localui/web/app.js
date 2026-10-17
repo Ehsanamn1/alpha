@@ -78,7 +78,7 @@
     $('nodeValue').textContent = String(catalog.node_count ?? state.nodes.length);
     $('navNodeCount').textContent = String(catalog.node_count ?? state.nodes.length);
     $('nodeTotalPill').textContent = `${catalog.node_count ?? state.nodes.length} کانفیگ`;
-    $('nodeFoot').textContent = state.nodes.length ? 'برای اتصال هوشمند آمادهٔ بررسی' : 'لینک یا اشتراک وارد کن';
+    $('nodeFoot').textContent = state.nodes.length ? 'برای اتصال هوشمند آمادهٔ بررسی' : 'دریافت خودکار از کانال‌های عمومی';
     $('nodeProgress').style.width = `${Math.min(100, state.nodes.length ? 100 : 0)}%`;
     $('sourceValue').textContent = String(state.sources.length);
     $('sourceTotalPill').textContent = `${state.sources.length} منبع`;
@@ -89,7 +89,7 @@
   }
   function renderNodes() {
     if (!state.nodes.length) {
-      $('nodeList').innerHTML = '<div class="empty-state">هیچ کانفیگی وارد نشده است. از کادر بالا لینک‌های اشتراک یا متن Base64 را وارد کن.</div>';
+      $('nodeList').innerHTML = '<div class="empty-state">هنوز کانفیگی دریافت نشده؛ کانال‌های عمومی به‌صورت خودکار بررسی می‌شوند. می‌توانی «همگام‌سازی الآن» را بزنی.</div>';
       return;
     }
     $('nodeList').innerHTML = state.nodes.map((node) => `<article class="node-card"><div class="node-head"><div class="node-title">${esc(node.name || 'Unnamed node')}</div><span class="pill good">ذخیره‌شده</span></div><div class="node-meta"><span class="meta-chip protocol">${esc(String(node.protocol || 'unknown').toUpperCase())}</span><span class="meta-chip">${esc(node.server || 'server')}</span><span class="meta-chip">:${esc(node.port || '—')}</span></div><div class="node-source">منبع: ${esc(node.source || 'واردسازی دستی')} · به‌روزرسانی ${esc(timeLabel(node.updated_at))}</div><div class="node-actions"><button class="small-action" data-action="use-node">تلاش برای اتصال</button><button class="danger-btn" data-delete-node="${esc(node.id)}">حذف</button></div></article>`).join('');
