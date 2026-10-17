@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0-alpha — 2026-10-17
+
+- Added safe HTTPS source-fetch fallback through Alpha's local SOCKS5 router when direct access fails; targets remain public-IP-pinned and TLS verification stays enabled.
+- Added a regression test proving SOCKS5 CONNECT requests use the validated public IP rather than a remote hostname lookup.
+- Fixed background catalog refresh so active sing-box config is reapplied whenever node membership changes, including removals and replacements.
+- Published an installable static website/PWA shell and mobile quick-navigation; it does not expose the local proxy/controller.
+- Updated CI to validate local and public browser assets and the website manifest.
+- Updated versioned release workflow to package source, cross-platform builds, checksums and an all-in-one bundle.
+
 ## 0.3.0-alpha — 2026-10-17
 
 - Added persistent local catalog of HTTPS subscription sources and public Telegram preview channels.

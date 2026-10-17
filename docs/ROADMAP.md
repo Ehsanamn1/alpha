@@ -1,4 +1,4 @@
-# Alpha roadmap — 0.3.0-alpha
+# Alpha roadmap — 0.4.0-alpha
 
 ## Completed in this alpha
 
@@ -16,9 +16,9 @@
 - [ ] End-to-end acceptance test with an official sing-box binary and real configs on Windows/Linux/macOS.
 - [ ] Verify each supported protocol variant against a pinned sing-box release; share-link conventions differ by provider.
 - [ ] Import validated Clash YAML and sing-box JSON in addition to links/Base64.
-- [ ] Refresh subscription sources through a working proxy when direct Telegram access is blocked.
+- [x] Retry source fetching through Alpha's local SOCKS5 route when direct HTTPS access fails, with validated public-IP CONNECT targets and standard TLS verification.
 - [ ] Track a node across multiple sources and expire stale nodes after successful updates.
-- [ ] Add backoff, circuit breaking and real-network reconnection tests.
+- [ ] Add backoff, circuit breaking and real-network reconnection tests. The proxy fallback has mocked SOCKS5 regression coverage; real ISP field tests remain outstanding.
 - [ ] Independent security review and deeper SSRF/DNS/source threat review.
 
 ## Phase 2 — Distinct sources and transports

@@ -72,14 +72,29 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: release-assets
           pattern: Alpha-*
           merge-multiple: true
-      - name: Generate package checksums
-        run: cd release-assets && sha256sum Alpha-*.zip > SHA256SUMS.txt
-      - uses: softprops/action-gh-release@v2
+      - name: Package source archive and all-in-one bundle
+        run: |
+          set -euxo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          git archive --format=zip --prefix="Alpha-${VERSION}/" HEAD > "release-assets/Alpha-${VERSION}-source.zip"
+          mkdir -p /tmp/alpha-bundle/source /tmp/alpha-bundle/dist
+          unzip -q "release-assets/Alpha-${VERSION}-source.zip" -d /tmp/alpha-bundle/source
+          unzip -p "release-assets/Alpha-Windows-x64-${VERSION}.zip" alpha-windows-amd64.exe > /tmp/alpha-bundle/dist/alpha-windows-amd64.exe
+          unzip -p "release-assets/Alpha-Linux-x64-${VERSION}.zip" alpha-linux-amd64 > /tmp/alpha-bundle/dist/alpha-linux-amd64
+          unzip -p "release-assets/Alpha-Linux-ARM64-${VERSION}.zip" alpha-linux-arm64 > /tmp/alpha-bundle/dist/alpha-linux-arm64
+          unzip -p "release-assets/Alpha-macOS-Intel-${VERSION}.zip" alpha-darwin-amd64 > /tmp/alpha-bundle/dist/alpha-macos-intel
+          unzip -p "release-assets/Alpha-macOS-Apple-Silicon-${VERSION}.zip" alpha-darwin-arm64 > /tmp/alpha-bundle/dist/alpha-macos-arm64
+          cp "release-assets/Alpha-${VERSION}-source.zip" /tmp/alpha-bundle/
+          (cd /tmp/alpha-bundle && zip -rq "$GITHUB_WORKSPACE/release-assets/Alpha-${VERSION}-bundle.zip" .)
+          (cd release-assets && sha256sum Alpha-*.zip > SHA256SUMS.txt)
+      - name: Publish release and artifacts
+        uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           fail_on_unmatched_files: true

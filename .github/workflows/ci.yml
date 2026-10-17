@@ -21,3 +21,12 @@ jobs:
         run: go vet ./...
       - name: Build
         run: go build -trimpath -ldflags="-s -w" ./cmd/resilience
+      - name: Validate browser assets and PWA manifest
+        run: |
+          node --check internal/localui/web/app.js
+          node --check internal/localui/web/sw.js
+          node --check site/sw.js
+          test -s site/index.html
+          test -s site/icon.svg
+          node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('site/manifest.webmanifest','utf8')); if(m.start_url!=='./'||m.scope!=='./'||!m.icons?.length) process.exit(1)"
+          grep -q 'https://ehsanamn1.github.io/alpha/' README_FA.md
