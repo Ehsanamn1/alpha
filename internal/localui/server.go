@@ -26,7 +26,7 @@ import (
 //go:embed web/*
 var webFiles embed.FS
 
-const Version = "0.4.3-alpha"
+const Version = "0.4.4-alpha"
 
 type Server struct {
 	cfg         config.Config
@@ -36,6 +36,8 @@ type Server struct {
 	started     time.Time
 	catalog     *subscriptions.Store
 	connMu      sync.Mutex
+	connectMu   sync.Mutex
+	autoConnect bool
 	runCtx      context.Context
 	connActive  bool
 	connStatus  string
@@ -87,7 +89,7 @@ func New(cfg config.Config, manager *orchestrator.Manager, uiAddress string) (*S
 	if err != nil {
 		return nil, fmt.Errorf("initialize local subscription catalog: %w", err)
 	}
-	return &Server{cfg: cfg, manager: manager, token: hex.EncodeToString(raw[:]), uiAddress: uiAddress, started: time.Now(), catalog: catalog, connStatus: "disconnected"}, nil
+	return &Server{cfg: cfg, manager: manager, token: hex.EncodeToString(raw[:]), uiAddress: uiAddress, started: time.Now(), catalog: catalog, connStatus: "discovering-sources", autoConnect: true}, nil
 }
 
 // Handler returns an HTTP handler intended to bind only to loopback.
@@ -239,21 +241,23 @@ func (s *Server) writeJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func (s *Server) Serve(ctx context.Context, address string) error {
-	s.connMu.Lock()
-	s.runCtx = ctx
-	s.connMu.Unlock()
-	go s.backgroundSourceRefresh(ctx)
 	host, _, err := net.SplitHostPort(address)
 	if err != nil {
 		return fmt.Errorf("UI listen address must be host:port: %w", err)
 	}
 	if host != "localhost" && (net.ParseIP(host) == nil || !net.ParseIP(host).IsLoopback()) {
-		return errors.New("Alpha UI binds to loopback only; LAN/public binding is disabled in this alpha")
+		return errors.New("Alpha UI binds to loopback only; LAN/public binding is not supported")
+	}
+	if _, err := s.catalog.EnsureDefaultSources(); err != nil {
+		return fmt.Errorf("initialize default sources: %w", err)
 	}
 	ln, err := net.Listen("tcp", address)
 	if err != nil {
 		return fmt.Errorf("listen for Alpha UI on %s: %w", address, err)
 	}
+	s.connMu.Lock()
+	s.runCtx = ctx
+	s.connMu.Unlock()
 	srv := &http.Server{Handler: s.Handler(), ReadHeaderTimeout: 3 * time.Second, IdleTimeout: 30 * time.Second}
 	go func() {
 		<-ctx.Done()
@@ -261,10 +265,9 @@ func (s *Server) Serve(ctx context.Context, address string) error {
 		defer cancel()
 		_ = srv.Shutdown(shutdownCtx)
 	}()
+	go s.backgroundSourceRefresh(ctx)
 	err = srv.Serve(ln)
-	if errors.Is(err, http.ErrServerClosed) || ctx.Err() != nil {
-		return nil
-	}
+	if errors.Is(err, http.ErrServerClosed) || ctx.Err() != nil { return nil }
 	return err
 }
 
