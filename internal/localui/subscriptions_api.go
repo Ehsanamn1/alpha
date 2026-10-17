@@ -67,6 +67,7 @@ func (s *Server) handleSources(w http.ResponseWriter, r *http.Request) {
 				_ = s.refreshActiveConfig()
 			}
 		}()
+		source.URL = ""
 		s.writeJSON(w, http.StatusCreated, map[string]any{"source": source, "message": "منبع اضافه شد؛ دریافت اولیه در پس‌زمینه انجام می‌شود."})
 	case http.MethodDelete:
 		if !s.authorized(w, r) {
