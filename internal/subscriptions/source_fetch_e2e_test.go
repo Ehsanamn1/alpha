@@ -27,9 +27,9 @@ import (
 
 type e2eSelector struct{ backends []model.Backend }
 
-func (s *e2eSelector) HealthyBackends() []model.Backend { return s.backends }
+func (s *e2eSelector) HealthyBackends() []model.Backend        { return s.backends }
 func (s *e2eSelector) MarkBackendFailure(model.Backend, error) {}
-func (s *e2eSelector) MarkBackendSuccess(model.Backend)       {}
+func (s *e2eSelector) MarkBackendSuccess(model.Backend)        {}
 
 // This test exercises real HTTP/TLS bytes through the Alpha router and the
 // official sing-box process. The final SOCKS endpoint maps the pinned public IP
@@ -141,8 +141,8 @@ func startPinnedIPTLSServer(t *testing.T, pinnedIP, payload string) (*x509.CertP
 	template := &x509.Certificate{
 		SerialNumber: big.NewInt(17), Subject: pkix.Name{CommonName: "Alpha E2E source"},
 		NotBefore: now.Add(-time.Minute), NotAfter: now.Add(2 * time.Hour),
-		KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageCertSign,
-		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageCertSign,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true, IsCA: true, IPAddresses: []net.IP{net.ParseIP(pinnedIP)},
 	}
 	der, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
