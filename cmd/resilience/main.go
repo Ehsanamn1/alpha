@@ -20,7 +20,7 @@ import (
 	"github.com/Ehsanamn1/alpha/internal/router"
 )
 
-const version = "0.4.0-alpha"
+const version = "0.4.1-alpha"
 
 func main() {
 	if len(os.Args) < 2 {

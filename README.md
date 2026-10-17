@@ -6,26 +6,27 @@
 
 **Website:** https://ehsanamn1.github.io/alpha/ · **Releases:** https://github.com/Ehsanamn1/alpha/releases · **Source:** https://github.com/Ehsanamn1/alpha
 
-**Version: 0.4.0-alpha. Experimental; not a production-ready or guaranteed anti-censorship VPN.**
+**Version: 0.4.1-alpha. Experimental; not a production-ready or guaranteed anti-censorship VPN.**
 
 Alpha is a local-first controller for importing compatible proxy share links, refreshing public HTTPS / Telegram-preview sources, generating sing-box configuration, probing local routes and keeping a managed sing-box process alive. Alpha does not reimplement the VLESS/VMess/Trojan protocols; it uses the external sing-box engine for imported nodes.
 
 ## Download the alpha build
 
-- [All release assets](https://github.com/Ehsanamn1/alpha/releases/tag/v0.4.0-alpha)
-- [Full bundle (source + binaries)](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.0-alpha/Alpha-0.4.0-alpha-bundle.zip)
-- [Source archive](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.0-alpha/Alpha-0.4.0-alpha-source.zip)
-- [SHA-256 checksums](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.0-alpha/SHA256SUMS.txt)
+- [All release assets](https://github.com/Ehsanamn1/alpha/releases/tag/v0.4.1-alpha)
+- [Full bundle (source + binaries)](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.1-alpha/Alpha-0.4.1-alpha-bundle.zip)
+- [Source archive](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.1-alpha/Alpha-0.4.1-alpha-source.zip)
+- [SHA-256 checksums](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.1-alpha/SHA256SUMS.txt)
 
 The public product/download website is published at [ehsanamn1.github.io/alpha](https://ehsanamn1.github.io/alpha/). It is a static, installable information/download portal; the controller and proxy run locally on the user's device and are not exposed as a public service.
 
-## 0.4.0-alpha capabilities
+## 0.4.1-alpha capabilities
 
 - Persian RTL dashboard with desktop navigation and mobile bottom navigation for Overview, Connect, Nodes, Sources, Routes and Diagnostics.
 - Import supported `vless://`, `vmess://`, `trojan://`, `ss://`, `hysteria2://`, `tuic://`, `anytls://`, SOCKS and HTTP share links, plus Base64 subscription bodies.
 - Persistent local catalog with link deduplication; raw credential-bearing URIs are not returned by the read-only node-list API or diagnostics.
 - HTTPS source URLs and public Telegram previews (`t.me/s/<channel>`); source sync runs every 15 minutes while the local dashboard is active. If direct fetching fails, the controller retries through Alpha's local SOCKS5 router using validated public-IP pinning and normal TLS verification.
 - Generated sing-box URL-test group for automatic node selection, configuration validation before launch, and supervised restart after an unexpected process exit.
+- CI validates eight representative protocol configurations against the official sing-box v1.14.2 executable after verifying its SHA-256 digest; this is config compatibility testing, not a live service uptime guarantee.
 - Local Alpha SOCKS5 entry at `127.0.0.1:1088`, route health checks, session token, CSP, same-origin mutation checks, request size limits, public-IP-pinned HTTPS source dialing and private local config files. The session-bearing root HTML is never cached by the local dashboard service worker. The separate public website has an offline-capable information PWA but no access to the local proxy process.
 
 ## Quick start

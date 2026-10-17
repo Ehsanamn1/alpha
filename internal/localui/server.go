@@ -26,7 +26,7 @@ import (
 //go:embed web/*
 var webFiles embed.FS
 
-const Version = "0.4.0-alpha"
+const Version = "0.4.1-alpha"
 
 type Server struct {
 	cfg         config.Config

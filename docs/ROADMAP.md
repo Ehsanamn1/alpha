@@ -14,7 +14,7 @@
 ## Phase 1 — Real connectivity and safety
 
 - [ ] End-to-end acceptance test with an official sing-box binary and real configs on Windows/Linux/macOS.
-- [ ] Verify each supported protocol variant against a pinned sing-box release; share-link conventions differ by provider.
+- [x] CI validates representative generated profiles for eight protocols against pinned official sing-box v1.14.2; provider-specific variants and live service endpoints still require real-world acceptance tests.
 - [ ] Import validated Clash YAML and sing-box JSON in addition to links/Base64.
 - [x] Retry source fetching through Alpha's local SOCKS5 route when direct HTTPS access fails, with validated public-IP CONNECT targets and standard TLS verification.
 - [ ] Track a node across multiple sources and expire stale nodes after successful updates.

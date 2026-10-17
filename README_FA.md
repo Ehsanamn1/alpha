@@ -6,20 +6,20 @@
 
 **وب‌سایت:** https://ehsanamn1.github.io/alpha/ · **انتشارها:** https://github.com/Ehsanamn1/alpha/releases · **سورس:** https://github.com/Ehsanamn1/alpha
 
-> **نسخه: 0.4.0-alpha — آزمایشی.** واردسازی منابع و تولید تنظیمات sing-box اضافه شده، اما هنوز VPN بومی سراسری Android/iOS، ادغام پروتکل TheFeed از روی DNS، iodine یا Spoof Tunnel و آزمون میدانی روی شبکه‌های ایران تکمیل نشده‌اند.
+> **نسخه: 0.4.1-alpha — آزمایشی.** واردسازی منابع و تولید تنظیمات sing-box اضافه شده، اما هنوز VPN بومی سراسری Android/iOS، ادغام پروتکل TheFeed از روی DNS، iodine یا Spoof Tunnel و آزمون میدانی روی شبکه‌های ایران تکمیل نشده‌اند.
 
 آلفا یک برنامهٔ محلی برای جمع‌آوری کانفیگ‌های سازگار، دنبال‌کردن منابع عمومی قابل دسترس، آزمودن مسیرها و مدیریت اتصال از طریق موتورهای بیرونی است. هستهٔ اصلی آلفا خودش پروتکل‌های VLESS/VMess/Trojan را پیاده‌سازی نمی‌کند؛ برای اجرای آن نودها از sing-box استفاده می‌کند.
 
 ## دریافت نسخهٔ آزمایشی
 
-- [صفحهٔ Release و همهٔ فایل‌ها](https://github.com/Ehsanamn1/alpha/releases/tag/v0.4.0-alpha)
-- [بستهٔ کامل شامل سورس و باینری‌ها](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.0-alpha/Alpha-0.4.0-alpha-bundle.zip)
-- [سورس مستقل](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.0-alpha/Alpha-0.4.0-alpha-source.zip)
-- [فایل بررسی SHA-256](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.0-alpha/SHA256SUMS.txt)
+- [صفحهٔ Release و همهٔ فایل‌ها](https://github.com/Ehsanamn1/alpha/releases/tag/v0.4.1-alpha)
+- [بستهٔ کامل شامل سورس و باینری‌ها](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.1-alpha/Alpha-0.4.1-alpha-bundle.zip)
+- [سورس مستقل](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.1-alpha/Alpha-0.4.1-alpha-source.zip)
+- [فایل بررسی SHA-256](https://github.com/Ehsanamn1/alpha/releases/download/v0.4.1-alpha/SHA256SUMS.txt)
 
 وب‌سایت عمومی آلفا اکنون در [ehsanamn1.github.io/alpha](https://ehsanamn1.github.io/alpha/) منتشر است. این سایت یک صفحهٔ معرفی/دریافتِ قابل نصب است؛ کنترلر و پراکسی واقعی روی دستگاه کاربر اجرا می‌شوند و به‌صورت سرور عمومی منتشر نشده‌اند.
 
-## قابلیت‌های نسخهٔ 0.4.0-alpha
+## قابلیت‌های نسخهٔ 0.4.1-alpha
 
 - پنل فارسی RTL با ناوبری دسکتاپ و نوار پایین موبایل: نمای کلی، اتصال، کانفیگ‌ها، منابع، مسیرها و عیب‌یابی.
 - واردسازی لینک‌های `vless://`, `vmess://`, `trojan://`, `ss://`, `hysteria2://` / `hy2://`, `tuic://`, `anytls://`, `socks5://`, `socks://`, `http://` و `https://` که با parser سازگار باشند.
@@ -27,6 +27,7 @@
 - فهرست محلی پایدار و deduplication بر اساس لینک؛ URIهای کامل حاوی رمز در API فهرست یا گزارش عیب‌یابی نمایش داده نمی‌شوند.
 - افزودن منابع HTTPS و کانال‌های **عمومی** تلگرام مثل `@thefeedconfig`; همگام‌سازی هر ۱۵ دقیقه. در صورت شکست HTTPS مستقیم، تلاش دوم از پراکسی SOCKS5 محلی آلفا با مقصد IP عمومی اعتبارسنجی‌شده انجام می‌شود؛ بررسی عادی TLS حفظ می‌شود.
 - تولید خودکار کانفیگ sing-box و گروه `urltest` برای آزمایش و انتخاب نودها؛ با خروج ناگهانی موتور، supervisor تلاش می‌کند آن را دوباره اجرا کند.
+- CI هشت نمونهٔ پروتکل را با باینری رسمی sing-box نسخهٔ 1.14.2 و بررسی SHA-256 اعتبارسنجی می‌کند؛ این آزمون سازگاری فایل تنظیمات است و اثبات اتصال زنده به سرور واقعی نیست.
 - مدیریت پراکسی SOCKS5 محلی روی `127.0.0.1:1088` و بررسی سلامت endpointهای محلی با آزمون واقعی HTTP/HTTPS.
 - ذخیرهٔ catalog و کانفیگ فعال در پوشهٔ تنظیمات کاربر؛ فایل‌ها روی سیستم‌عامل با مجوز محدود نوشته می‌شوند.
 - توکن جلسه، CSP، رد درخواست cross-origin، اندازهٔ محدود درخواست‌ها، بررسی DNS/redirect منبع و pin کردن HTTPS به IP عمومی؛ HTML دارای توکن در service worker cache نمی‌شود و listener فقط روی loopback است.

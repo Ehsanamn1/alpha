@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1-alpha — 2026-10-17
+
+- Fixed standard `trojan://password@host:port` parsing; passwords without a colon are now read from the URI username component.
+- Added CI verification against the official sing-box v1.14.2 executable, pinned by SHA-256.
+- Added per-protocol generated-config checks for VLESS, VMess, Trojan, Shadowsocks, Hysteria2, TUIC, AnyTLS and SOCKS5.
+- Confirmed the complete CI pipeline (race tests, vet, build, browser asset validation) on the parser-fix commit before the release/version bump.
+
 ## 0.4.0-alpha — 2026-10-17
 
 - Added safe HTTPS source-fetch fallback through Alpha's local SOCKS5 router when direct access fails; targets remain public-IP-pinned and TLS verification stays enabled.
