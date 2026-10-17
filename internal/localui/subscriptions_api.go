@@ -380,10 +380,14 @@ func (s *Server) backgroundSourceRefresh(ctx context.Context) {
 	}
 	for {
 		if len(s.catalog.Snapshot().Sources) > 0 {
+			before := catalogNodeIDs(s.catalog.NodesForConnect())
 			work, cancel := context.WithTimeout(ctx, 90*time.Second)
-			added, _, _ := s.catalog.Refresh(work)
+			s.catalog.Refresh(work)
 			cancel()
-			if added > 0 {
+			after := catalogNodeIDs(s.catalog.NodesForConnect())
+			// Reapply if the catalog changed in either direction, including a
+			// replacement/removal that did not increase the total node count.
+			if before != after {
 				_ = s.refreshActiveConfig()
 			}
 		}

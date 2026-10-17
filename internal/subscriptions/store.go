@@ -18,6 +18,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	alphasocks "github.com/Ehsanamn1/alpha/internal/socks5"
 )
 
 const maxSourceBytes = 8 << 20
@@ -578,8 +580,68 @@ func (s *Store) fetch(ctx context.Context, rawURL string) (string, error) {
 	if err := ensurePublicDestination(ctx, u.Hostname()); err != nil {
 		return "", err
 	}
+
+	// Prefer direct, DNS-pinned HTTPS. Retry through Alpha's loopback SOCKS5
+	// router if the current network blocks the source. The fallback pins the
+	// CONNECT target to a validated public IP and keeps standard TLS checks.
+	resp, directErr := s.doSourceRequest(ctx, rawURL, false)
+	directProblem := ""
+	if directErr != nil {
+		directProblem = directErr.Error()
+	} else if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		directProblem = fmt.Sprintf("منبع پاسخ HTTP %d داد", resp.StatusCode)
+		_ = resp.Body.Close()
+		resp = nil
+	}
+	if resp == nil {
+		resp, err = s.doSourceRequest(ctx, rawURL, true)
+		if err != nil {
+			if directProblem == "" {
+				directProblem = "دریافت مستقیم ناموفق بود"
+			}
+			return "", fmt.Errorf("دریافت مستقیم منبع ناموفق بود (%s)؛ تلاش از مسیر پراکسی محلی آلفا هم ناموفق بود: %w", directProblem, err)
+		}
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			status := resp.StatusCode
+			_ = resp.Body.Close()
+			return "", fmt.Errorf("دریافت مستقیم منبع ناموفق بود (%s)؛ مسیر جایگزین آلفا هم HTTP %d برگرداند", directProblem, status)
+		}
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxSourceBytes+1))
+	if err != nil {
+		return "", err
+	}
+	if len(body) > maxSourceBytes {
+		return "", errors.New("حجم منبع از ۸ مگابایت بیشتر است")
+	}
+	return string(body), nil
+}
+
+func (s *Store) doSourceRequest(ctx context.Context, rawURL string, viaAlpha bool) (*http.Response, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Scheme != "https" || !publicHostname(u.Hostname()) {
+		return nil, errors.New("منبع HTTPS عمومی معتبر نیست")
+	}
+	if err := ensurePublicDestination(ctx, u.Hostname()); err != nil {
+		return nil, err
+	}
+
+	transport := &http.Transport{
+		DialContext:           publicSourceDialContext,
+		ForceAttemptHTTP2:     !viaAlpha,
+		MaxIdleConns:          8,
+		IdleConnTimeout:       30 * time.Second,
+		TLSHandshakeTimeout:   8 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+	}
+	if viaAlpha {
+		transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+			return dialPublicSourceViaSOCKS5(ctx, "127.0.0.1:1088", network, address)
+		}
+	}
 	client := *s.client
-	client.Transport = &http.Transport{DialContext: publicSourceDialContext, ForceAttemptHTTP2: true, MaxIdleConns: 8, IdleConnTimeout: 30 * time.Second, TLSHandshakeTimeout: 8 * time.Second, ResponseHeaderTimeout: 10 * time.Second}
+	client.Transport = transport
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		if len(via) >= 4 {
 			return errors.New("redirect limit exceeded")
@@ -591,26 +653,88 @@ func (s *Store) fetch(ctx context.Context, rawURL string) (string, error) {
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	req.Header.Set("User-Agent", "Alpha-Network-Resilience/0.3 (+https://github.com/Ehsanamn1/alpha)")
+	req.Header.Set("User-Agent", "Alpha-Network-Resilience/0.4 (+https://github.com/Ehsanamn1/alpha)")
 	req.Header.Set("Accept", "text/html,text/plain,application/json,*/*;q=0.5")
-	resp, err := client.Do(req)
+	return client.Do(req)
+}
+
+// dialPublicSourceViaSOCKS5 tunnels a public HTTPS request through Alpha's
+// local router while preserving IP pinning. It never asks a remote proxy to
+// resolve arbitrary hostnames, and only permits the standard HTTPS port.
+func dialPublicSourceViaSOCKS5(ctx context.Context, proxyAddr, network, address string) (net.Conn, error) {
+	if network != "tcp" && network != "tcp4" && network != "tcp6" {
+		return nil, fmt.Errorf("unsupported source network %q", network)
+	}
+	host, portText, err := net.SplitHostPort(address)
+	if err != nil || portText != "443" {
+		return nil, errors.New("only public HTTPS on port 443 is allowed")
+	}
+	ips, err := resolvePublicIPs(ctx, host)
 	if err != nil {
-		return "", fmt.Errorf("دریافت منبع ناموفق: %w", err)
+		return nil, err
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return "", fmt.Errorf("منبع پاسخ HTTP %d داد", resp.StatusCode)
+	var lastErr error
+	for _, ip := range ips {
+		conn, dialErr := (&net.Dialer{Timeout: 4 * time.Second, KeepAlive: 20 * time.Second}).DialContext(ctx, "tcp", proxyAddr)
+		if dialErr != nil {
+			lastErr = dialErr
+			continue
+		}
+		deadline := time.Now().Add(8 * time.Second)
+		if contextDeadline, ok := ctx.Deadline(); ok && contextDeadline.Before(deadline) {
+			deadline = contextDeadline
+		}
+		_ = conn.SetDeadline(deadline)
+		if err := alphasocks.Negotiate(conn); err != nil {
+			_ = conn.Close()
+			lastErr = fmt.Errorf("negotiate Alpha SOCKS5: %w", err)
+			continue
+		}
+		request, err := alphasocks.BuildConnectRequest(ip.String(), 443)
+		if err != nil {
+			_ = conn.Close()
+			return nil, err
+		}
+		if err := writeSOCKSRequest(conn, request); err != nil {
+			_ = conn.Close()
+			lastErr = fmt.Errorf("write SOCKS5 connect request: %w", err)
+			continue
+		}
+		_, replyCode, err := alphasocks.ReadReply(conn)
+		if err != nil || replyCode != 0 {
+			_ = conn.Close()
+			if err != nil {
+				lastErr = fmt.Errorf("read SOCKS5 connect reply: %w", err)
+			} else {
+				lastErr = fmt.Errorf("Alpha SOCKS5 refused public source IP %s (reply %d)", ip, replyCode)
+			}
+			continue
+		}
+		_ = conn.SetDeadline(time.Time{})
+		return conn, nil
 	}
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxSourceBytes+1))
-	if err != nil {
-		return "", err
+	if lastErr == nil {
+		lastErr = errors.New("no public source address was available")
 	}
-	if len(body) > maxSourceBytes {
-		return "", errors.New("حجم منبع از ۸ مگابایت بیشتر است")
+	return nil, fmt.Errorf("source fetch through Alpha SOCKS5 failed: %w", lastErr)
+}
+
+func writeSOCKSRequest(conn net.Conn, request []byte) error {
+	for len(request) > 0 {
+		n, err := conn.Write(request)
+		if n > 0 {
+			request = request[n:]
+		}
+		if err != nil {
+			return err
+		}
+		if n == 0 {
+			return io.ErrShortWrite
+		}
 	}
-	return string(body), nil
+	return nil
 }
 
 func extractVisibleText(document string) string {
