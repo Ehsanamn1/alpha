@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.4-alpha — 2026-10-18
+
+- Seed four public Telegram proxy/config channels on first UI launch; initial and 15-minute refreshes require no manual URI entry.
+- Persist source URLs in the private local catalog and redact them from browser API responses; recover older Telegram source URLs when the channel ID is known.
+- Add regression tests for feed idempotency, persistence, redaction and legacy channel migration.
+- Connection remains a one-click action after feeds are fetched; public nodes are untrusted and availability is not guaranteed.
+
+
 ## 0.4.3-alpha — 2026-10-17
 
 - Added `alpha smoke`, a cross-platform CLI command that probes real HTTP/HTTPS egress through the running Alpha SOCKS5 router after the user connects a node.
