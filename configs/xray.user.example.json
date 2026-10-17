@@ -1,0 +1,51 @@
+{
+  "log": {
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 2081,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": false
+      },
+      "tag": "alpha-local-socks"
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "user-configured-outbound",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "YOUR_SERVER_HOST",
+            "port": 443,
+            "users": [
+              {
+                "id": "YOUR-UUID",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "YOUR_TLS_NAME",
+          "fingerprint": "chrome"
+        },
+        "wsSettings": {
+          "path": "/YOUR_WEBSOCKET_PATH",
+          "headers": {
+            "Host": "YOUR_HOST_HEADER"
+          }
+        }
+      }
+    }
+  ]
+}

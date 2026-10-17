@@ -1,0 +1,45 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "inbounds": [
+    {
+      "type": "socks",
+      "tag": "alpha-local-socks",
+      "listen": "127.0.0.1",
+      "listen_port": 2080
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "vless",
+      "tag": "user-configured-outbound",
+      "server": "YOUR_SERVER_HOST",
+      "server_port": 443,
+      "uuid": "YOUR-UUID",
+      "tls": {
+        "enabled": true,
+        "server_name": "YOUR_TLS_NAME",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        }
+      },
+      "transport": {
+        "type": "ws",
+        "path": "/YOUR_WEBSOCKET_PATH",
+        "headers": {
+          "Host": "YOUR_HOST_HEADER"
+        }
+      }
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "final": "user-configured-outbound"
+  }
+}

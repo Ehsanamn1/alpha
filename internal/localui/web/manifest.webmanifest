@@ -1,0 +1,13 @@
+{
+  "name": "Alpha Network Resilience",
+  "short_name": "Alpha",
+  "description": "Local control for imported proxy nodes and resilient routes",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a1013",
+  "theme_color": "#0a1013",
+  "icons": [{"src":"/assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

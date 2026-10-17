@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1013">
+  <meta name="alpha-session" content="__ALPHA_SESSION__">
+  <meta name="description" content="Alpha — مدیریت محلی منابع، کانفیگ‌ها و مسیرهای اتصال">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/app.css">
+  <title>Alpha — مرکز کنترل اتصال</title>
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" data-view="overview" aria-label="آلفا؛ مرکز کنترل">
+        <img src="/assets/icon.svg" alt="لوگوی آلفا" width="42" height="42">
+        <span><b>ALPHA</b><small>NETWORK RESILIENCE</small></span>
+      </a>
+      <div class="nav-label">فضای کار</div>
+      <button class="nav-item active" data-view="overview"><span class="nav-icon">◈</span> نمای کلی</button>
+      <button class="nav-item" data-view="connect"><span class="nav-icon">⏻</span> اتصال هوشمند</button>
+      <button class="nav-item" data-view="nodes"><span class="nav-icon">⤳</span> کانفیگ‌ها <span class="nav-count" id="navNodeCount">0</span></button>
+      <button class="nav-item" data-view="sources"><span class="nav-icon">◎</span> منابع خودکار</button>
+      <div class="nav-label nav-label-secondary">ابزارها</div>
+      <button class="nav-item" data-view="routes"><span class="nav-icon">⇄</span> مسیرها و موتور‌ها</button>
+      <button class="nav-item" data-view="diagnostics"><span class="nav-icon">⌁</span> عیب‌یابی</button>
+      <div class="sidebar-bottom">
+        <div class="mini-status"><span class="status-dot" id="sideStatusDot"></span><div><b id="sideStatusTitle">در حال بررسی</b><small id="sideVersion">نسخه Alpha</small></div></div>
+        <div class="side-caption">LOCAL-FIRST · OPEN SOURCE</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><div class="eyebrow">ALPHA / CONTROL CENTER</div><h1 id="pageTitle">مرکز کنترل شبکه</h1></div>
+        <div class="top-actions"><span class="local-tag"><i></i> ذخیره‌سازی روی دستگاه</span><button id="refreshBtn" class="icon-btn" title="به‌روزرسانی وضعیت" aria-label="به‌روزرسانی وضعیت">↻</button></div>
+      </header>
+
+      <section class="view" id="overviewView">
+        <section class="hero panel-hero">
+          <div class="hero-copy">
+            <div class="hero-overline"><span class="live-dot" id="heroLiveDot"></span> ROUTE INTELLIGENCE</div>
+            <h2 id="headline">یک نقطه ورود.<br><em>چندین مسیر جایگزین.</em></h2>
+            <p>کانفیگ‌های خودت را اضافه کن یا منابع عمومی را دنبال کن. آلفا نودها را مرتب می‌کند و از طریق موتور sing-box مسیرهای قابل استفاده را خودکار آزمایش و جابه‌جا می‌کند.</p>
+            <div class="hero-buttons"><button id="heroConnectBtn" class="primary-btn"><span>⏻</span> اتصال هوشمند</button><button class="secondary-btn" data-view="sources">افزودن منبع <span>↗</span></button></div>
+          </div>
+          <div class="hero-visual" aria-hidden="true"><div class="ring ring-one"></div><div class="ring ring-two"></div><div class="ring ring-three"></div><div class="hub"><img src="/assets/icon.svg" alt="" width="64" height="64"></div><span class="orb orb-a"></span><span class="orb orb-b"></span><span class="orb orb-c"></span><span class="orb orb-d"></span></div>
+          <div class="hero-footer"><span>SMART FAILOVER</span><span class="footer-sep"></span><span>AUTO SOURCE SYNC</span><span class="footer-sep"></span><span>LOCAL PROXY</span></div>
+        </section>
+
+        <div class="metrics-grid">
+          <article class="metric-card"><div class="metric-head"><span>کانفیگ‌های ذخیره‌شده</span><span class="metric-glyph">⤳</span></div><div class="metric-value" id="nodeValue">0</div><div class="metric-foot" id="nodeFoot">آمادهٔ واردسازی</div><div class="mini-progress"><span id="nodeProgress"></span></div></article>
+          <article class="metric-card"><div class="metric-head"><span>منابع دنبال‌شده</span><span class="metric-glyph">◎</span></div><div class="metric-value" id="sourceValue">0</div><div class="metric-foot" id="sourceFoot">اشتراک HTTPS و کانال عمومی</div><div class="metric-decoration">AUTO SYNC</div></article>
+          <article class="metric-card"><div class="metric-head"><span>مسیرهای سالم</span><span class="metric-glyph">⇄</span></div><div class="metric-value" id="healthyValue">0<small id="totalValue">/ 0</small></div><div class="metric-foot" id="healthyFoot">در انتظار بررسی</div><div class="mini-progress"><span id="healthBar"></span></div></article>
+          <article class="metric-card"><div class="metric-head"><span>وضعیت اتصال هوشمند</span><span class="metric-glyph">◉</span></div><div class="metric-value metric-status" id="connectionValue">خاموش</div><div class="metric-foot" id="connectionFoot">برای اتصال، موتور sing-box لازم است</div><div class="metric-decoration" id="latencyValue">LATENCY —</div></article>
+        </div>
+
+        <section class="overview-grid">
+          <article class="panel route-panel"><div class="panel-heading"><div><div class="eyebrow">LIVE ROUTES</div><h3>وضعیت مسیرها</h3></div><button class="text-link" data-view="routes">نمایش همه <span>←</span></button></div><div class="route-list" id="routeList"><div class="empty-state">در حال بارگذاری وضعیت مسیرها…</div></div><div class="panel-footer-note">مسیر سبز یعنی آزمون واقعی عبور ترافیک موفق بوده؛ صرف بازبودن پورت کافی نیست.</div></article>
+          <article class="panel quick-panel"><div class="panel-heading"><div><div class="eyebrow">QUICK ACTIONS</div><h3>دسترسی سریع</h3></div><span class="pill" id="systemPill">در حال بررسی</span></div><button class="action-row" data-view="nodes"><span class="action-icon">＋</span><span><b>واردکردن کانفیگ</b><small>VLESS، VMess، Trojan، SS، Hysteria2، TUIC</small></span><span class="row-arrow">←</span></button><button class="action-row" data-view="sources"><span class="action-icon">↻</span><span><b>همگام‌سازی منابع</b><small>فید HTTPS و پیش‌نمایش کانال عمومی تلگرام</small></span><span class="row-arrow">←</span></button><button class="action-row" data-view="diagnostics"><span class="action-icon">⌁</span><span><b>گزارش عیب‌یابی</b><small>سلامت مسیرها و وضعیت موتور</small></span><span class="row-arrow">←</span></button><div class="inline-warning"><span>i</span><p>منابع عمومی ناشناس‌اند. اضافه‌کردن، به‌معنی اعتماد یا اتصال فوری نیست؛ فعال‌سازی فقط با اقدام خودت انجام می‌شود.</p></div></article>
+        </section>
+      </section>
+
+      <section class="view hidden" id="connectView">
+        <section class="connect-hero panel"><div class="connect-main"><div class="eyebrow">SMART CONNECTION / SING-BOX</div><h2>یک اتصال مدیریتی،<br><em>انتخاب مسیر به‌صورت خودکار.</em></h2><p>آلفا کانفیگ‌های سازگار را به یک پیکربندی sing-box تبدیل می‌کند. گروه آزمون sing-box مسیرها را دوره‌ای بررسی می‌کند و از میان نودهای اضافه‌شده انتخاب می‌کند.</p><div class="connection-status"><span class="status-light" id="connectionDot"></span><div><b id="connectionTitle">اتصال برقرار نیست</b><small id="connectionDetail">ابتدا کانفیگ اضافه کن و موتور sing-box را نصب کن.</small></div></div><div class="hero-buttons"><button id="connectBtn" class="primary-btn">⏻ اتصال به بهترین مسیر</button><button id="disconnectBtn" class="secondary-btn" disabled>قطع اتصال</button></div></div><div class="connect-side"><div class="big-status-mark"><img src="/assets/icon.svg" alt="Alpha" width="100" height="100"></div><div class="side-stat"><span>ورودی SOCKS5 آلفا</span><strong id="connectProxy">127.0.0.1:1088</strong><button id="copyProxyBtn" class="copy-mini">کپی</button></div><div class="side-stat"><span>موتور انتخاب مسیر</span><strong>sing-box · URLTest</strong></div></div></section>
+        <div class="notice-panel"><b>محدودیت فنی</b><p>این نسخه ترافیک برنامه‌هایی را که روی پراکسی محلی تنظیم شده‌اند عبور می‌دهد؛ هنوز VPN سراسری native برای Android/iOS نیست. پایداری به اینترنت در دسترس، اعتبار سرورها و امکان رسیدن به آن‌ها وابسته است.</p></div>
+        <section class="panel"><div class="panel-heading"><div><div class="eyebrow">CONNECTION READINESS</div><h3>پیش‌نیازهای اتصال</h3></div></div><div class="readiness-grid"><div class="readiness-item"><span class="ready-symbol">01</span><div><b>کانفیگ‌های سازگار</b><small id="readyNodes">هنوز کانفیگی اضافه نشده</small></div></div><div class="readiness-item"><span class="ready-symbol">02</span><div><b>موتور sing-box</b><small id="readyEngine">در حال تشخیص موتور</small></div></div><div class="readiness-item"><span class="ready-symbol">03</span><div><b>مسیر محلی</b><small>127.0.0.1:2089 ← sing-box / 127.0.0.1:1088 ← Alpha</small></div></div></div></section>
+      </section>
+
+      <section class="view hidden" id="nodesView">
+        <section class="panel"><div class="panel-heading"><div><div class="eyebrow">CONFIGURATION LIBRARY</div><h3>افزودن کانفیگ</h3><p class="panel-subtitle">چند لینک را با خط جدید جدا کن؛ متن اشتراک Base64 نیز پذیرفته می‌شود.</p></div><span class="pill" id="nodeTotalPill">0 کانفیگ</span></div><form id="importForm" class="stack-form"><label for="importText">لینک یا متن اشتراک</label><textarea id="importText" rows="5" placeholder="vless://…&#10;vmess://…&#10;trojan://…&#10;یا متن Base64 اشتراک" required></textarea><div class="form-actions"><button class="primary-btn" type="submit" id="importBtn">＋ واردسازی کانفیگ‌ها</button><span class="subtle-help">کلیدها و رمزهای کانفیگ فقط روی همین دستگاه ذخیره می‌شوند.</span></div></form></section>
+        <section class="panel"><div class="panel-heading"><div><div class="eyebrow">IMPORTED NODES</div><h3>کتابخانه کانفیگ‌ها</h3></div><button class="text-link" data-view="connect">اتصال هوشمند ←</button></div><div id="nodeList" class="node-grid"><div class="empty-state">هنوز کانفیگی وارد نشده است.</div></div></section>
+      </section>
+
+      <section class="view hidden" id="sourcesView">
+        <section class="panel"><div class="panel-heading"><div><div class="eyebrow">AUTO SOURCE SYNC</div><h3>افزودن منبع کانفیگ</h3><p class="panel-subtitle">منبع HTTPS، لینک اشتراک یا کانال عمومی تلگرام را اضافه کن. آلفا هر ۱۵ دقیقه منابع فعال را بررسی می‌کند.</p></div><button id="refreshSourcesBtn" class="secondary-btn small">↻ همگام‌سازی الآن</button></div>
+          <form id="sourceForm" class="source-form"><div class="form-field"><label for="sourceName">نام منبع <span>اختیاری</span></label><input id="sourceName" type="text" placeholder="مثلاً کانال کانفیگ من"></div><div class="form-field source-url-field"><label for="sourceURL">لینک اشتراک یا کانال</label><input id="sourceURL" type="text" placeholder="https://example.com/sub.txt یا @channel" required></div><button class="primary-btn" type="submit" id="addSourceBtn">＋ افزودن منبع</button></form>
+          <div class="preset-heading"><b>منابع نمونه</b><span>منابع عمومی؛ کیفیت و محتوای آن‌ها تضمین نمی‌شود.</span></div><div class="preset-grid"><button class="preset-card" data-preset="thefeed"><span class="preset-icon">◉</span><span><b>TheFeed Configs</b><small>کانال عمومی @thefeedconfig</small></span><i>＋</i></button><button class="preset-card" data-preset="networkti"><span class="preset-icon">⌁</span><span><b>NetworkTI</b><small>کانال عمومی @networkti</small></span><i>＋</i></button></div>
+        </section>
+        <section class="panel"><div class="panel-heading"><div><div class="eyebrow">WATCHED SOURCES</div><h3>منابع ثبت‌شده</h3></div><span class="pill" id="sourceTotalPill">0 منبع</span></div><div id="sourceList" class="source-list"><div class="empty-state">هنوز منبعی اضافه نشده است.</div></div></section>
+        <div class="notice-panel"><b>شفافیت دربارهٔ منابع</b><p>آلفا کانال‌های عمومی قابل دریافت را می‌خواند؛ خواندن خود سرویس TheFeed از روی DNS درون‌برنامه‌ای جداگانه پیاده‌سازی نشده است. منبع HTTPS یا کانال عمومی تلگرام نیز در زمان مسدودبودن همان سرویس ممکن است قابل دریافت نباشد. جست‌وجوی خودکار Google API این نسخه فعال نیست؛ از لینک اشتراک مشخص استفاده کن.</p></div>
+      </section>
+
+      <section class="view hidden" id="routesView"><section class="panel"><div class="panel-heading"><div><div class="eyebrow">ENGINE STATUS</div><h3>تمام مسیرهای اتصال</h3><p class="panel-subtitle">سلامت مسیر از روی آزمون HTTP/HTTPS از داخل پروکسی محلی محاسبه می‌شود.</p></div><button id="routesProbeBtn" class="primary-btn small">بررسی مجدد</button></div><div id="allRoutes" class="route-list"></div></section></section>
+
+      <section class="view hidden" id="diagnosticsView"><section class="panel"><div class="panel-heading"><div><div class="eyebrow">SYSTEM DIAGNOSTICS</div><h3>گزارش سیستم</h3></div><button id="diagCopyBtn" class="secondary-btn small">کپی گزارش</button></div><div id="diagSummary" class="diagnostic-summary">در حال جمع‌آوری اطلاعات…</div><div class="diagnostic-grid"><div><label>مقصدهای آزمون</label><div id="probeTargets" class="target-list"></div></div><div><label>وضعیت موتور</label><div id="engineSummary" class="diagnostic-summary">در حال بررسی…</div></div></div><label class="section-label" for="diagLog">گزارش قابل کپی</label><pre id="diagLog" class="log-view">هنوز گزارشی ثبت نشده است.</pre><p class="subtle-help">قبل از ارسال گزارش، اطلاعات حساس را منتشر نکن. لینک اشتراک و URIهای خام عمداً در گزارش قرار نمی‌گیرند.</p></section></section>
+
+      <footer class="footer"><span class="footer-brand"><img src="/assets/icon.svg" alt="" width="22" height="22"> ALPHA <b id="footerVersion">0.3.0-alpha</b></span><span>OPEN SOURCE · LOCAL CONTROL</span><span>اتصال تضمینی در خاموشی کامل وجود ندارد</span></footer>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="ناوبری اصلی"><button class="mobile-nav-item active" data-view="overview"><span>◈</span><small>خانه</small></button><button class="mobile-nav-item" data-view="connect"><span>⏻</span><small>اتصال</small></button><button class="mobile-nav-item" data-view="nodes"><span>⤳</span><small>کانفیگ‌ها</small></button><button class="mobile-nav-item" data-view="sources"><span>◎</span><small>منابع</small></button><button class="mobile-nav-item" data-view="diagnostics"><span>⌁</span><small>ابزارها</small></button></nav>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+/config.json
+/resilience
+/resilience.exe
+/dist/
+*.log
+.DS_Store

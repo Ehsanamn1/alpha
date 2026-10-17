@@ -1,0 +1,124 @@
+{
+  "listen": "127.0.0.1:1088",
+  "probe_urls": [
+    "https://example.com/",
+    "https://www.cloudflare.com/cdn-cgi/trace"
+  ],
+  "probe_interval_seconds": 15,
+  "probe_timeout_seconds": 8,
+  "engine_start_timeout_seconds": 15,
+  "failure_threshold": 2,
+  "engines": [
+    {
+      "id": "diban-local",
+      "name": "Diban — existing local instance",
+      "adapter": "external-socks5",
+      "enabled": false,
+      "priority": 10,
+      "socks_addr": "127.0.0.1:1080"
+    },
+    {
+      "id": "tor-local",
+      "name": "Tor — local SOCKS endpoint",
+      "adapter": "managed-socks5",
+      "enabled": false,
+      "priority": 20,
+      "socks_addr": "127.0.0.1:9050",
+      "start_process": false,
+      "command": "tor",
+      "args": [
+        "-f",
+        "configs/torrc.example"
+      ],
+      "work_dir": ".",
+      "env": {}
+    },
+    {
+      "id": "sing-box-local",
+      "name": "sing-box — user configured core",
+      "adapter": "managed-socks5",
+      "enabled": false,
+      "priority": 30,
+      "socks_addr": "127.0.0.1:2080",
+      "start_process": false,
+      "command": "sing-box",
+      "args": [
+        "run",
+        "-c",
+        "configs/sing-box.user.json"
+      ],
+      "work_dir": ".",
+      "env": {}
+    },
+    {
+      "id": "xray-local",
+      "name": "Xray — user configured core",
+      "adapter": "managed-socks5",
+      "enabled": false,
+      "priority": 40,
+      "socks_addr": "127.0.0.1:2081",
+      "start_process": false,
+      "command": "xray",
+      "args": [
+        "run",
+        "-config",
+        "configs/xray.user.json"
+      ],
+      "work_dir": ".",
+      "env": {}
+    },
+    {
+      "id": "psiphon-local",
+      "name": "Psiphon — existing local client",
+      "adapter": "external-socks5",
+      "enabled": false,
+      "priority": 50,
+      "socks_addr": "127.0.0.1:1081"
+    },
+    {
+      "id": "managed-proxy-example",
+      "name": "Custom user-managed SOCKS5 engine",
+      "adapter": "managed-socks5",
+      "enabled": false,
+      "priority": 60,
+      "socks_addr": "127.0.0.1:3080",
+      "start_process": false,
+      "command": "",
+      "args": [],
+      "work_dir": ".",
+      "env": {}
+    },
+    {
+      "id": "master-relay-local",
+      "name": "MasterHttpRelayVPN — external local SOCKS5 if available",
+      "adapter": "external-socks5",
+      "enabled": false,
+      "priority": 70,
+      "socks_addr": "127.0.0.1:1082"
+    },
+    {
+      "id": "zyrln-local",
+      "name": "Zyrln — external local SOCKS5 if available",
+      "adapter": "external-socks5",
+      "enabled": false,
+      "priority": 80,
+      "socks_addr": "127.0.0.1:1083"
+    },
+    {
+      "id": "ltsc-local",
+      "name": "LTSC — external local SOCKS5 if available",
+      "adapter": "external-socks5",
+      "enabled": false,
+      "priority": 90,
+      "socks_addr": "127.0.0.1:1084"
+    },
+    {
+      "id": "other-relay-local",
+      "name": "Other relay (must expose local SOCKS5)",
+      "adapter": "external-socks5",
+      "enabled": false,
+      "priority": 100,
+      "socks_addr": "127.0.0.1:1085"
+    }
+  ]
+}

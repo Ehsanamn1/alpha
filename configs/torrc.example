@@ -1,0 +1,8 @@
+# Alpha Tor profile example.
+# This starts a normal Tor client; it does NOT guarantee connectivity under censorship.
+# For restricted networks, configure valid bridges/transports in a private torrc file.
+ClientOnly 1
+SocksPort 127.0.0.1:9050
+DataDirectory ./data/tor
+Log notice stdout
+AvoidDiskWrites 1
